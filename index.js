@@ -12,23 +12,25 @@ exports.getTokens = (async () => {
     async function main(url) {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
+        const outDir = `${__dirname}/out`;
 
         try {
-            await page.goto(url);
-            await page.waitFor(2000)
+            await page.goto(url, { waitUntil: 'networkidle0' });
 
-            let tokens = await getTokens(page);
+            const tokens = await getTokens(page);
 
+            if(!fs.existsSync(outDir)) {
+                fs.mkdirSync(outDir);
+            }
 
-            fs.writeFileSync('output.txt', JSON.stringify(tokens, null, 2));
-
-        } catch (error) {
+            fs.writeFileSync(`${outDir}/output.txt`, JSON.stringify(tokens, null, 2));
+        } 
+        catch (error) {
             console.error(error);
-        } finally {
+        } 
+        finally {
             browser.close();
         }
-
-
     }
 
     async function getTokens(page) {
