@@ -1,9 +1,12 @@
-const puppeteer = require('puppeteer');
-const {sanitizeUrl} = require('@braintree/sanitize-url');
 const fs = require('fs');
 
-exports.getTokens = (async () => {
-    let url = sanitizeUrl(process.argv[2]);
+const puppeteer = require('puppeteer');
+const { sanitizeUrl } = require('@braintree/sanitize-url');
+
+const tokenizationHelper = require('./helpers/tokenizationHelper');
+
+exports.runTokenizationCrawler = (async () => {
+    const url = sanitizeUrl(process.argv[2]);
 
     console.log(`Getting tokens for: ${url}`);
 
@@ -17,37 +20,23 @@ exports.getTokens = (async () => {
         try {
             await page.goto(url, { waitUntil: 'networkidle0' });
 
-            const tokens = await getTokens(page);
+            const tokens = await tokenizationHelper.getPageTokens(page);
 
-            if(!fs.existsSync(outDir)) {
+            console.log(`${tokens.length} tokens found`);
+
+            if (!fs.existsSync(outDir)) {
                 fs.mkdirSync(outDir);
             }
 
+            console.log('writing output file...');
+
             fs.writeFileSync(`${outDir}/output.txt`, JSON.stringify(tokens, null, 2));
-        } 
-        catch (error) {
+
+            console.log('done.');
+        } catch (error) {
             console.error(error);
-        } 
-        finally {
+        } finally {
             browser.close();
         }
-    }
-
-    async function getTokens(page) {
-        return await page.evaluate(() => {
-            const spans = document.getElementsByTagName('span');
-            const tokens = [];
-
-            for (let span of spans) {
-                if (span.attributes.key) {
-                    tokens.push({
-                        key: span.attributes.key.nodeValue,
-                        value: span.attributes.key.ownerElement.textContent
-                    });
-                }
-            }
-
-            return tokens;
-        });
     }
 })();
