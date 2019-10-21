@@ -1,7 +1,7 @@
 const commander = require('commander');
 const project = require('./package.json')
 
-const { runTokenizationCrawler } = require('./index');
+const { runTokenizationCrawler } = require('./modules/crawler');
 
 commander.version(project.version, '-v, --version');
 

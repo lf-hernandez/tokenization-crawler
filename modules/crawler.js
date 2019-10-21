@@ -3,7 +3,7 @@ const fs = require('fs');
 const puppeteer = require('puppeteer');
 const { sanitizeUrl } = require('@braintree/sanitize-url');
 
-const tokenizationHelper = require('./helpers/tokenizationHelper');
+const tokenizationHelper = require('../helpers/tokenizationHelper');
 
 exports.runTokenizationCrawler = (async () => {
     const url = sanitizeUrl(process.argv[2]);
@@ -30,12 +30,14 @@ exports.runTokenizationCrawler = (async () => {
 
             console.log('writing output file...');
 
-            fs.writeFileSync(`${outDir}/output.txt`, JSON.stringify(tokens, null, 2));
+            fs.writeFileSync(`${outDir}/output.json`, JSON.stringify(tokens, null, 2));
 
             console.log('done.');
-        } catch (error) {
+        } 
+        catch (error) {
             console.error(error);
-        } finally {
+        } 
+        finally {
             browser.close();
         }
     }
